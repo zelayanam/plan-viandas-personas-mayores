@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viandas Mayores · Plan de comidas para personas mayores</title>
+<meta name="description" content="Dos menus semanales con recetas, cantidades y lista de compras para personas mayores. Productos de estacion de Argentina.">
+<link rel="stylesheet" href="estilos.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥣</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#menu" aria-label="Inicio">
+      <span class="brand-logo" aria-hidden="true">🥣</span>
+      <span>
+        <strong>Viandas Mayores</strong>
+        <small>Plan de comidas para la tercera edad · Argentina</small>
+      </span>
+    </a>
+
+    <div class="controles" role="group" aria-label="Preferencias del plan">
+      <label class="control">
+        <span>Estación</span>
+        <select id="sel-estacion" aria-label="Elegir estación del año"></select>
+      </label>
+      <label class="control">
+        <span>Menú</span>
+        <select id="sel-menu" aria-label="Elegir menú semanal">
+          <option value="A">Menú A · Sabores de casa</option>
+          <option value="B">Menú B · Cocina mediterránea</option>
+        </select>
+      </label>
+      <label class="control">
+        <span>Porciones</span>
+        <select id="sel-porciones" aria-label="Cantidad de porciones">
+          <option value="1">1 persona</option>
+          <option value="2">2 personas</option>
+          <option value="4">4 personas</option>
+          <option value="6">6 personas</option>
+        </select>
+      </label>
+      <button class="btn-icono" id="btn-imprimir" title="Imprimir esta sección" aria-label="Imprimir">🖨️</button>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Secciones">
+    <button class="tab activo" data-vista="menu">📅 Menú semanal</button>
+    <button class="tab" data-vista="recetas">📖 Recetas</button>
+    <button class="tab" data-vista="compras">🛒 Lista de compras</button>
+    <button class="tab" data-vista="viandas">🥡 Guía de viandas</button>
+    <button class="tab" data-vista="nutricion">💚 Nutrición</button>
+  </nav>
+</header>
+
+<main id="app">
+
+  <!-- ================= MENU SEMANAL ================= -->
+  <section class="vista activa" id="vista-menu" aria-labelledby="h-menu">
+    <div class="hero">
+      <div class="hero-texto">
+        <span class="chip chip-claro" id="hero-estacion">Primavera</span>
+        <h1 id="h-menu">La semana, resuelta</h1>
+        <p id="hero-desc">Cinco comidas por día, con porciones pensadas para mantener el músculo,
+          los huesos y la energía. Todo se puede cocinar y envasar el domingo.</p>
+        <div class="hero-acciones">
+          <button class="btn-primario" data-vista="compras">Ver lista de compras</button>
+          <button class="btn-secundario" data-vista="viandas">Cómo preparar las viandas</button>
+        </div>
+      </div>
+      <div class="hero-resumen" id="hero-resumen"></div>
+    </div>
+
+    <div class="aviso" id="aviso-estacion"></div>
+
+    <div class="seccion-cabecera">
+      <h2 id="titulo-menu">Menú A · Sabores de casa</h2>
+      <div class="leyenda">
+        <span><i class="punto punto-almuerzo"></i> Almuerzo</span>
+        <span><i class="punto punto-cena"></i> Cena</span>
+        <span><i class="punto punto-desayuno"></i> Desayuno y merienda</span>
+      </div>
+    </div>
+
+    <div class="dias" id="contenedor-dias"></div>
+
+    <div class="nota-pie">
+      <strong>Cómo leer las cantidades.</strong> Todas las cantidades son por persona y por comida.
+      Cambiá “Porciones” arriba para ver el total de la olla. Las recetas indican si rinden más de una porción.
+    </div>
+  </section>
+
+  <!-- ================= RECETAS ================= -->
+  <section class="vista" id="vista-recetas" aria-labelledby="h-recetas">
+    <div class="seccion-cabecera">
+      <div>
+        <h1 id="h-recetas">Recetario</h1>
+        <p class="bajada">Preparaciones simples, con ingredientes de estación y pasos pensados para cocinar de a una olla.</p>
+      </div>
+    </div>
+
+    <div class="filtros">
+      <input type="search" id="buscar" placeholder="Buscar receta o ingrediente…" aria-label="Buscar receta">
+      <div class="chips" id="filtros-tipo" role="group" aria-label="Filtrar por tipo de comida"></div>
+      <div class="chips" id="filtros-beneficio" role="group" aria-label="Filtrar por beneficio"></div>
+    </div>
+
+    <div class="grid-recetas" id="grid-recetas"></div>
+    <p class="vacio" id="sin-resultados" hidden>No encontramos recetas con ese criterio. Probá con otra palabra.</p>
+  </section>
+
+  <!-- ================= COMPRAS ================= -->
+  <section class="vista" id="vista-compras" aria-labelledby="h-compras">
+    <div class="seccion-cabecera">
+      <div>
+        <h1 id="h-compras">Lista de compras</h1>
+        <p class="bajada">Se arma sola con el menú y las porciones elegidas. Tildá lo que ya tenés: queda guardado.</p>
+      </div>
+      <div class="acciones">
+        <button class="btn-secundario" id="btn-copiar">Copiar lista</button>
+        <button class="btn-secundario" id="btn-csv">Descargar CSV</button>
+        <button class="btn-secundario" id="btn-reset-checks">Destildar todo</button>
+      </div>
+    </div>
+
+    <div class="barra-compras">
+      <div class="segmentado" id="seg-compras" role="group" aria-label="Qué semana comprar">
+        <button class="activo" data-semana="A">Menú A</button>
+        <button data-semana="B">Menú B</button>
+        <button data-semana="AB">Los dos menús</button>
+      </div>
+      <div class="progreso" aria-live="polite">
+        <div class="barra"><span id="barra-compras"></span></div>
+        <small id="texto-progreso">0 de 0 productos</small>
+      </div>
+    </div>
+
+    <div id="contenedor-compras"></div>
+  </section>
+
+  <!-- ================= VIANDAS ================= -->
+  <section class="vista" id="vista-viandas" aria-labelledby="h-viandas">
+    <div class="seccion-cabecera">
+      <div>
+        <h1 id="h-viandas">Guía de viandas</h1>
+        <p class="bajada">Cocinar una vez, comer bien toda la semana. Envases, frío, recalentado y texturas seguras.</p>
+      </div>
+    </div>
+    <div class="grid-guia" id="grid-guia"></div>
+
+    <h2 class="subtitulo">Cuánto dura cada preparación en el freezer</h2>
+    <div class="tabla-wrap">
+      <table class="tabla" id="tabla-freezer">
+        <thead><tr><th>Preparación</th><th>Duración</th><th>Consejo</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2 class="subtitulo">Seis trucos que hacen la diferencia</h2>
+    <div class="grid-tips" id="grid-tips"></div>
+  </section>
+
+  <!-- ================= NUTRICION ================= -->
+  <section class="vista" id="vista-nutricion" aria-labelledby="h-nutricion">
+    <div class="seccion-cabecera">
+      <div>
+        <h1 id="h-nutricion">Nutrición</h1>
+        <p class="bajada">Qué necesita el cuerpo después de los 65 y cómo lo cubre este plan, comida por comida.</p>
+      </div>
+    </div>
+
+    <div class="destacado" id="destacado-nutricion"></div>
+
+    <h2 class="subtitulo">Nutrientes clave</h2>
+    <div class="grid-nutrientes" id="grid-nutrientes"></div>
+
+    <h2 class="subtitulo">El plato saludable</h2>
+    <div class="plato-wrap">
+      <div class="plato" aria-hidden="true">
+        <div class="plato-mitad"><span>½</span><small>Verduras</small></div>
+        <div class="plato-cuarto p1"><span>¼</span><small>Proteína</small></div>
+        <div class="plato-cuarto p2"><span>¼</span><small>Cereales</small></div>
+      </div>
+      <ul class="plato-lista" id="plato-lista"></ul>
+    </div>
+
+    <h2 class="subtitulo">Cobertura estimada del menú</h2>
+    <p class="bajada">Promedio de los 7 días, calculado con tablas de composición de alimentos. Son valores estimados: no reemplazan una consulta con nutricionista.</p>
+    <div class="grid-cobertura" id="grid-cobertura"></div>
+
+    <h2 class="subtitulo">Las 10 recomendaciones de las Guías Alimentarias Argentinas</h2>
+    <ol class="lista-numerada" id="lista-gapa"></ol>
+
+    <div class="nota-legal">
+      <strong>Importante.</strong> Este plan es una guía general y no reemplaza la indicación médica.
+      Si hay diabetes, enfermedad renal, hipertensión, disfagia, alergias o se toman medicamentos,
+      consultar con el equipo de salud antes de cambiar la alimentación.
+    </div>
+  </section>
+
+</main>
+
+<footer class="pie">
+  <div>
+    <strong>Viandas Mayores</strong> · Plan de comidas para personas mayores
+    <p>Elaborado con criterios de las Guías Alimentarias para la Población Argentina (Ministerio de Salud)
+       y recomendaciones de proteínas, calcio y vitamina D para adultos mayores.</p>
+  </div>
+  <div class="pie-meta">
+    <span id="pie-estacion"></span>
+    <span>Versión 1.0 · 2026</span>
+  </div>
+</footer>
+
+<!-- Modal de receta -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-fondo" data-cerrar></div>
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <button class="modal-cerrar" data-cerrar aria-label="Cerrar receta">✕</button>
+    <div id="modal-contenido"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="datos.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
