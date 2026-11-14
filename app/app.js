@@ -36,6 +36,7 @@
     estacion: estadoGuardado.estacion || estacionPorFecha(),
     menu: estadoGuardado.menu || "A",
     porciones: Number(estadoGuardado.porciones) || 1,
+    tema: estadoGuardado.tema || "clasica",
     vista: "menu",
     semanaCompras: estadoGuardado.semanaCompras || "A",
     checks: estadoGuardado.checks || {},
@@ -51,7 +52,7 @@
     try {
       localStorage.setItem(CLAVE, JSON.stringify({
         estacion: state.estacion, menu: state.menu, porciones: state.porciones,
-        semanaCompras: state.semanaCompras, checks: state.checks
+        semanaCompras: state.semanaCompras, checks: state.checks, tema: state.tema
       }));
     } catch (e) { /* modo privado */ }
   }
@@ -141,6 +142,14 @@
       state.porciones = Number(selPor.value);
       guardarEstado();
       renderTodo();
+    });
+
+    const selTema = $("#sel-tema");
+    selTema.value = state.tema;
+    selTema.addEventListener("change", () => {
+      state.tema = selTema.value;
+      document.documentElement.dataset.tema = state.tema;
+      guardarEstado();
     });
 
     $("#btn-imprimir").addEventListener("click", () => window.print());
@@ -577,7 +586,11 @@
       if (men && D.menus[men]) state.menu = men;
       const por = Number(params.get("porciones"));
       if ([1, 2, 4, 6].includes(por)) state.porciones = por;
+      const tem = params.get("tema");
+      if (["clasica", "dorada", "contraste"].includes(tem)) state.tema = tem;
     } catch (e) { /* sin soporte */ }
+
+    document.documentElement.dataset.tema = state.tema;
 
     initControles();
     renderTodo();

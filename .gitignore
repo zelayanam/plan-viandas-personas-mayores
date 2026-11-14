@@ -17,3 +17,6 @@ qa/
 # Entornos virtuales
 .venv/
 venv/
+
+# Autenticacion temporal
+.gh-auth/

@@ -25,6 +25,19 @@ cantidades y una aplicación web para elegir estación, menú y porciones.
 La app no necesita internet ni servidor. Funciona en cualquier navegador moderno,
 en computadora, tablet o celular.
 
+### Paletas de colores
+
+En el selector **Tema** se puede cambiar la apariencia sin perder los datos elegidos:
+
+- **Clásica:** verde y terracota, la paleta original.
+- **Dorada:** ocres, ámbar y marrones cálidos, pensada para la edad dorada.
+- **Alto contraste:** blanco, negro y azul profundo, con letra más grande, para baja
+  visión o ambientes muy iluminados.
+
+La preferencia queda guardada en el navegador y también se puede fijar con un enlace:
+`app/index.html?tema=dorada`.
+
+
 ## Qué incluye el plan
 
 - **Menú A · Sabores de casa:** cocina casera argentina (guisos, tartas, milanesas al horno).
