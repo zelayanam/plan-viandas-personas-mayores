@@ -20,3 +20,6 @@ venv/
 
 # Autenticacion temporal
 .gh-auth/
+
+# Investigacion de mercado
+ads/

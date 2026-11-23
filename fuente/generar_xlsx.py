@@ -2,6 +2,7 @@
 """Genera la planilla Excel del plan de viandas."""
 
 import math
+import sys
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -80,7 +81,7 @@ ws = wb.active
 ws.title = "Resumen"
 ws.sheet_view.showGridLines = False
 titulo(ws, "Plan de viandas para personas mayores",
-       "Dos menús semanales · Argentina · Productos de estación · Versión 1.0 (noviembre 2026)")
+       "2 menús × 4 estaciones · Argentina · Productos de estación · Versión 1.0 (noviembre 2026)")
 
 ws["A4"] = "Para quién"
 ws["A4"].font = Font(bold=True, color=VERDE, size=10)
@@ -112,41 +113,41 @@ cabecera(ws, 9, ["Menú", "Energía (kcal)", "Proteína (g)", "Calcio (mg)", "Fi
          [22, 16, 15, 15, 13, 13])
 fila = 10
 for sem, menu in D["menus"].items():
-    filas = D["resumen"][sem]
-    vals = [
-        f"{menu['nombre']} · {menu['lema']}",
-        round(sum(f["kcal"] for f in filas) / 7),
-        round(sum(f["prot"] for f in filas) / 7, 1),
-        round(sum(f["calcio"] for f in filas) / 7),
-        round(sum(f["fibra"] for f in filas) / 7, 1),
-        round(sum(f["hierro"] for f in filas) / 7, 1),
-    ]
-    for i, v in enumerate(vals, 1):
-        c = ws.cell(row=fila, column=i, value=v)
-        c.border = BORDE
-        c.font = Font(size=10, bold=(i == 1), color=(VERDE if i == 1 else "2B2A24"))
-        c.alignment = Alignment(horizontal="center" if i > 1 else "left", vertical="center")
-        if i > 1:
-            c.number_format = "0.0" if i in (3, 5, 6) else "0"
-    fila += 1
+    for est, filas in D["resumen"][sem].items():
+        vals = [
+            f"{menu['nombre']} · {est.capitalize()}",
+            round(sum(f["kcal"] for f in filas) / 7),
+            round(sum(f["prot"] for f in filas) / 7, 1),
+            round(sum(f["calcio"] for f in filas) / 7),
+            round(sum(f["fibra"] for f in filas) / 7, 1),
+            round(sum(f["hierro"] for f in filas) / 7, 1),
+        ]
+        for i, v in enumerate(vals, 1):
+            c = ws.cell(row=fila, column=i, value=v)
+            c.border = BORDE
+            c.font = Font(size=10, bold=(i == 1), color=(VERDE if i == 1 else "2B2A24"))
+            c.alignment = Alignment(horizontal="center" if i > 1 else "left", vertical="center")
+            if i > 1:
+                c.number_format = "0.0" if i in (3, 5, 6) else "0"
+        fila += 1
 
 ws["A14"] = "Cómo está armado"
 ws["A14"].font = Font(bold=True, color=VERDE, size=10)
 ws.merge_cells("A15:F17")
-ws["A15"] = ("7 días × 5 comidas por menú · 44 recetas · Lista de compras por rubro. "
-             "Las cantidades son por persona y por comida. En la app se puede cambiar la estación, "
-             "el menú y la cantidad de porciones.")
+ws["A15"] = ("8 semanas: 2 menús × 4 estaciones × 7 días × 5 comidas · 66 recetas · "
+             "Lista de compras por rubro. Las cantidades son por persona y por comida. "
+             "En la app se puede cambiar la estación, el menú y la cantidad de porciones.")
 ws["A15"].alignment = Alignment(wrap_text=True, vertical="top")
 ws["A15"].font = Font(size=10, color="2B2A24")
 
 ws["A19"] = "Hojas de esta planilla"
 ws["A19"].font = Font(bold=True, color=VERDE, size=11)
 hojas = [
-    ("Menú A", "La semana completa, con el detalle de cada comida y la cobertura del día."),
-    ("Menú B", "La semana mediterránea, con el detalle de cada comida."),
-    ("Recetas", "Las 44 recetas con tiempos, porciones y aporte nutricional por porción."),
-    ("Nutrición", "Cobertura diaria de los dos menús, con promedios y objetivos."),
-    ("Compras A / B", "Lista de compras por rubro para cada semana."),
+    ("Menú A", "Las cuatro semanas (una por estación), con el detalle de cada comida."),
+    ("Menú B", "Las cuatro semanas mediterráneas, con el detalle de cada comida."),
+    ("Recetas", "Las 66 recetas con tiempos, porciones y aporte nutricional por porción."),
+    ("Nutrición", "Cobertura diaria de las 8 semanas, con promedios y objetivos."),
+    ("Compras A / B", "Lista de compras por rubro para cada semana (primavera)."),
     ("Estación", "Frutas y verduras de cada estación del año."),
     ("Guía de viandas", "Envases, frío, recalentado y texturas."),
 ]
@@ -165,31 +166,43 @@ for sem in ["A", "B"]:
     ws.sheet_view.showGridLines = False
     menu = D["menus"][sem]
     titulo(ws, f"{menu['nombre']} · {menu['lema']}", menu["descripcion"])
-    cabecera(ws, 4, ["Día", "Desayuno", "Colación", "Almuerzo", "Merienda", "Cena", "kcal del día"],
-             [12, 30, 26, 34, 28, 34, 12])
-    r = 5
-    for d in menu["dias"]:
-        ws.cell(row=r, column=1, value=d["dia"]).font = Font(bold=True, color=VERDE, size=10)
-        for j, toma in enumerate(["desayuno", "colacion", "almuerzo", "merienda", "cena"], 2):
-            ws.cell(row=r, column=j, value=REC[d[toma]]["nombre"])
-        kcal = sum(REC[d[t]]["nutricion"]["kcal"] for t in ["desayuno", "colacion", "almuerzo", "merienda", "cena"])
-        ws.cell(row=r, column=7, value=kcal).number_format = "0"
-        ws.row_dimensions[r].height = 44
+    r = 4
+    for est in ["invierno", "otono", "primavera", "verano"]:
+        temp = menu["temporadas"][est]
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=7)
+        c = ws.cell(row=r, column=1, value=f"{est.upper()} · {temp['descripcion']}")
+        c.font = Font(bold=True, color=BLANCO, size=10)
+        c.fill = PatternFill("solid", fgColor=VERDE)
+        c.alignment = Alignment(vertical="center", wrap_text=True)
+        ws.row_dimensions[r].height = 30
         r += 1
-    estilo_datos(ws, 5, r - 1, 1, 7)
-    for f in range(5, r):
-        ws.cell(row=f, column=7).font = Font(bold=True, size=10, color=TERRA)
-        ws.cell(row=f, column=7).alignment = Alignment(horizontal="center", vertical="center")
 
-    # totales
-    ws.cell(row=r + 1, column=1, value="Promedio semanal").font = Font(bold=True, color=VERDE, size=10)
-    ws.cell(row=r + 1, column=7, value=f"=ROUND(AVERAGE(G5:G{r-1}),0)").font = Font(bold=True, color=VERDE, size=10)
-    ws.cell(row=r + 1, column=7).number_format = "0"
+        cabecera(ws, r, ["Día", "Desayuno", "Colación", "Almuerzo", "Merienda", "Cena", "kcal del día"],
+                 [12, 30, 26, 34, 28, 34, 12])
+        r += 1
+        ini = r
+        for d in temp["dias"]:
+            ws.cell(row=r, column=1, value=d["dia"]).font = Font(bold=True, color=VERDE, size=10)
+            for j, toma in enumerate(["desayuno", "colacion", "almuerzo", "merienda", "cena"], 2):
+                ws.cell(row=r, column=j, value=REC[d[toma]]["nombre"])
+            kcal = sum(REC[d[t]]["nutricion"]["kcal"] for t in ["desayuno", "colacion", "almuerzo", "merienda", "cena"])
+            ws.cell(row=r, column=7, value=kcal).number_format = "0"
+            ws.row_dimensions[r].height = 44
+            r += 1
+        estilo_datos(ws, ini, r - 1, 1, 7)
+        for f in range(ini, r):
+            ws.cell(row=f, column=7).font = Font(bold=True, size=10, color=TERRA)
+            ws.cell(row=f, column=7).alignment = Alignment(horizontal="center", vertical="center")
+
+        ws.cell(row=r, column=1, value="Promedio semanal").font = Font(bold=True, color=VERDE, size=10)
+        ws.cell(row=r, column=7, value=f"=ROUND(AVERAGE(G{ini}:G{r-1}),0)").font = Font(bold=True, color=VERDE, size=10)
+        ws.cell(row=r, column=7).number_format = "0"
+        r += 2
 
 # ============================================================ RECETAS
 ws = wb.create_sheet("Recetas")
 ws.sheet_view.showGridLines = False
-titulo(ws, "Recetario", "44 recetas · valores por porción · estimados con tablas de composición de alimentos")
+titulo(ws, "Recetario", "66 recetas · valores por porción · estimados con tablas de composición de alimentos")
 cabecera(ws, 4, ["Receta", "Tipo", "Tiempo (min)", "Dificultad", "Porciones", "Apta vianda",
                  "kcal", "Proteína (g)", "Calcio (mg)", "Fibra (g)", "Hierro (mg)"],
          [42, 12, 12, 11, 10, 11, 9, 11, 11, 10, 11])
@@ -221,35 +234,41 @@ titulo(ws, "Cobertura nutricional diaria",
 cabecera(ws, 4, ["Menú", "Día", "Energía (kcal)", "Proteína (g)", "Calcio (mg)", "Fibra (g)", "Hierro (mg)"],
          [10, 13, 15, 14, 14, 13, 13])
 r = 5
-for sem, filas in D["resumen"].items():
-    for f_ in filas:
-        vals = [sem, f_["dia"], f_["kcal"], f_["prot"], f_["calcio"], f_["fibra"], f_["hierro"]]
-        for i, v in enumerate(vals, 1):
-            c = ws.cell(row=r, column=i, value=v)
-            c.border = BORDE
-            c.font = Font(size=10)
-            c.alignment = Alignment(horizontal="center", vertical="center")
-            if i >= 3:
-                c.number_format = "0.0" if i in (4, 6, 7) else "0"
-        ws.cell(row=r, column=2).alignment = Alignment(horizontal="left", vertical="center")
+for sem in ["A", "B"]:
+    for est, filas in D["resumen"][sem].items():
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=7)
+        c = ws.cell(row=r, column=1, value=f"{sem} · {est.upper()}")
+        c.font = Font(bold=True, color=BLANCO, size=10)
+        c.fill = PatternFill("solid", fgColor=VERDE)
         r += 1
-    # promedio del menú
-    ini = r - 7
-    ws.cell(row=r, column=1, value=sem).font = Font(bold=True, color=TERRA, size=10)
-    ws.cell(row=r, column=2, value="Promedio").font = Font(bold=True, color=TERRA, size=10)
-    for i, col in enumerate(["C", "D", "E", "F", "G"], 3):
-        c = ws.cell(row=r, column=i, value=f"=AVERAGE({col}{ini}:{col}{r-1})")
-        c.number_format = "0.0" if i in (4, 6, 7) else "0"
-        c.font = Font(bold=True, color=TERRA, size=10)
-        c.alignment = Alignment(horizontal="center")
-        c.fill = PatternFill("solid", fgColor=CREMA)
-        c.border = BORDE
-    r += 2
+        for f_ in filas:
+            vals = [sem, f_["dia"], f_["kcal"], f_["prot"], f_["calcio"], f_["fibra"], f_["hierro"]]
+            for i, v in enumerate(vals, 1):
+                c = ws.cell(row=r, column=i, value=v)
+                c.border = BORDE
+                c.font = Font(size=10)
+                c.alignment = Alignment(horizontal="center", vertical="center")
+                if i >= 3:
+                    c.number_format = "0.0" if i in (4, 6, 7) else "0"
+            ws.cell(row=r, column=2).alignment = Alignment(horizontal="left", vertical="center")
+            r += 1
+        # promedio de la semana
+        ini = r - 7
+        ws.cell(row=r, column=1, value=sem).font = Font(bold=True, color=TERRA, size=10)
+        ws.cell(row=r, column=2, value="Promedio").font = Font(bold=True, color=TERRA, size=10)
+        for i, col in enumerate(["C", "D", "E", "F", "G"], 3):
+            c = ws.cell(row=r, column=i, value=f"=AVERAGE({col}{ini}:{col}{r-1})")
+            c.number_format = "0.0" if i in (4, 6, 7) else "0"
+            c.font = Font(bold=True, color=TERRA, size=10)
+            c.alignment = Alignment(horizontal="center")
+            c.fill = PatternFill("solid", fgColor=CREMA)
+            c.border = BORDE
+        r += 2
 
 # ============================================================ COMPRAS
 def compras(semana, estacion="primavera"):
     mapa = {}
-    for d in D["menus"][semana]["dias"]:
+    for d in D["menus"][semana]["temporadas"][estacion]["dias"]:
         for t in D["tomas"]:
             rec = REC[d[t["id"]]]
             for ing in rec["ingredientes"]:
@@ -345,5 +364,6 @@ ws.column_dimensions["C"].width = 40
 wb.properties.title = "Plan de viandas para personas mayores"
 wb.properties.subject = "Menús, recetas y cantidades"
 wb.properties.creator = "Plan de viandas"
-wb.save("Plan_Alimentario_Adultos_Mayores.xlsx")
-print("XLSX generado")
+salida = sys.argv[1] if len(sys.argv) > 1 else "Plan_Alimentario_Adultos_Mayores.xlsx"
+wb.save(salida)
+print(f"XLSX generado: {salida}")

@@ -351,7 +351,7 @@ r.font.color.rgb = BLANCO
 
 p3 = c.add_paragraph()
 p3.paragraph_format.space_after = Pt(24)
-r = p3.add_run("Dos menús semanales, recetas y cantidades para cocinar,\nenvasar y mantener la fuerza, los huesos y la energía.")
+r = p3.add_run("Ocho semanas de menús, recetas y cantidades para cocinar,\nenvasar y mantener la fuerza, los huesos y la energía.")
 r.font.size = Pt(12)
 r.font.color.rgb = RGBColor(0xDB, 0xE5, 0xD3)
 
@@ -369,7 +369,7 @@ datos_portada = [
     ("Para quién", "Adultos mayores de 65 años, con o sin dentadura completa, actividad física liviana."),
     ("Cobertura diaria", f"{D['meta']['energia_objetivo']} · {D['meta']['proteina_objetivo']} · "
                          f"{D['meta']['calcio_objetivo']} de calcio"),
-    ("Cómo está armado", "7 días × 5 comidas × 2 menús (A y B), con 44 recetas y lista de compras."),
+    ("Cómo está armado", "8 semanas (2 menús × 4 estaciones) × 5 comidas, con 66 recetas y lista de compras."),
 ]
 for i, (k, v) in enumerate(datos_portada):
     celda_texto(t.cell(i, 0), k, bold=True, size=9, color=VERDE)
@@ -388,12 +388,14 @@ contenido = [
     ("2", "Qué necesita el cuerpo después de los 65", "Proteínas, calcio, vitamina D, fibra, hierro, agua y sodio."),
     ("3", "El plato saludable y las 10 recomendaciones", "La guía argentina aplicada a la vida diaria."),
     ("4", "Productos de estación", "Qué comprar en primavera, verano, otoño e invierno."),
-    ("5", "Recetas base", "Desayunos, colaciones y meriendas que se repiten en los dos menús."),
-    ("6", "Menú A · Sabores de casa", "La semana completa y las 14 recetas principales."),
-    ("7", "Menú B · Cocina mediterránea", "La semana completa y las 14 recetas principales."),
-    ("8", "Guía de viandas", "Envases, frío, recalentado, texturas y seguridad alimentaria."),
-    ("9", "Lista de compras", "Todo lo necesario para cada semana, por rubro."),
-    ("10", "Anexo", "Medidas caseras, equivalencias y preguntas frecuentes."),
+    ("5", "Recetas base", "Desayunos, colaciones y meriendas que se repiten en los menús."),
+    ("6", "Menús de invierno", "Las dos semanas completas, con guisos, sopas y horno."),
+    ("7", "Menús de otoño", "Las dos semanas con horno moderado y verduras de la temporada."),
+    ("8", "Menús de primavera", "Cocción ligera, arvejas y espárragos, con platos frescos."),
+    ("9", "Menús de verano", "Sin horno: ensaladas completas, platos fríos y gazpacho."),
+    ("10", "Guía de viandas", "Envases, frío, recalentado, texturas y seguridad alimentaria."),
+    ("11", "Lista de compras", "Todo lo necesario para cada semana, por rubro."),
+    ("12", "Anexo", "Medidas caseras, equivalencias y preguntas frecuentes."),
 ]
 for num, titulo, desc in contenido:
     p = doc.add_paragraph()
@@ -673,8 +675,8 @@ for tipo, titulo in [("desayuno", "Desayunos"), ("colacion", "Colaciones"), ("me
 
 
 # ============================================================== MENUS
-def tabla_menu(semana):
-    menu = D["menus"][semana]
+def tabla_menu(semana, estacion):
+    temp = D["menus"][semana]["temporadas"][estacion]
     t = doc.add_table(rows=1, cols=6)
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     bordes_tabla(t)
@@ -684,15 +686,15 @@ def tabla_menu(semana):
         celda_texto(t.cell(0, i), h, bold=True, size=8, color=BLANCO,
                     align=WD_ALIGN_PARAGRAPH.CENTER)
         sombrear(t.cell(0, i), "3D6B50")
-    for d in menu["dias"]:
+    for d in temp["dias"]:
         f = t.add_row()
         celda_texto(f.cells[0], d["dia"], bold=True, size=7.5, color=VERDE)
         for j, toma in enumerate(["desayuno", "colacion", "almuerzo", "merienda", "cena"], 1):
             celda_texto(f.cells[j], REC[d[toma]]["nombre"], size=7.5)
 
 
-def tabla_nutricion(semana):
-    filas = D["resumen"][semana]
+def tabla_nutricion(semana, estacion):
+    filas = D["resumen"][semana][estacion]
     t = doc.add_table(rows=1, cols=6)
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     bordes_tabla(t)
@@ -717,9 +719,9 @@ def tabla_nutricion(semana):
         sombrear(c, CREMA)
 
 
-def principales(semana):
+def principales(semana, estacion):
     ids, vistos = [], set()
-    for d in D["menus"][semana]["dias"]:
+    for d in D["menus"][semana]["temporadas"][estacion]["dias"]:
         for toma in ("almuerzo", "cena"):
             rid = d[toma]
             if rid not in vistos:
@@ -728,31 +730,43 @@ def principales(semana):
     return ids
 
 
-for semana, titulo in [
-    ("A", "6. Menú A · Sabores de casa"),
-    ("B", "7. Menú B · Cocina mediterránea"),
+ya_impresas = set()
+for estacion, titulo, intro in [
+    ("invierno", "6. Menús de invierno",
+     "Guisos, sopas y platos al horno: comida caliente para los días fríos."),
+    ("otono", "7. Menús de otoño",
+     "Platos de horno moderado y guisos livianos, con verduras de la temporada."),
+    ("primavera", "8. Menús de primavera",
+     "Cocción ligera y platos frescos, con arvejas, espárragos y hojas tiernas."),
+    ("verano", "9. Menús de verano",
+     "Sin horno y con cocción mínima: ensaladas completas, platos fríos y gazpacho. "
+     "Pensado para no calentar la cocina en los días de calor."),
 ]:
     h1(titulo)
-    parrafo(D["menus"][semana]["descripcion"])
+    parrafo(intro)
+    for semana in ["A", "B"]:
+        menu = D["menus"][semana]
+        h2(f"{menu['nombre']} · {menu['lema']}")
+        parrafo(menu["temporadas"][estacion]["descripcion"], size=9.5, color=GRIS)
 
-    h2("La semana completa")
-    tabla_menu(semana)
+        h3("La semana completa")
+        tabla_menu(semana, estacion)
 
-    parrafo("")
-    h2("Cobertura nutricional estimada")
-    parrafo("Valores calculados con tablas de composición de alimentos, por día y por persona. "
-            "Son estimaciones: varían según la marca, el tamaño de la porción y la forma de cocción.",
-            size=9, color=GRIS)
-    tabla_nutricion(semana)
+        parrafo("")
+        h3("Cobertura nutricional estimada")
+        parrafo("Valores calculados con tablas de composición de alimentos, por día y por persona. "
+                "Son estimaciones: varían según la marca, el tamaño de la porción y la forma de cocción.",
+                size=8.5, color=GRIS)
+        tabla_nutricion(semana, estacion)
 
-    h2("Las recetas de la semana")
-    parrafo("Se listan las 14 preparaciones principales (almuerzos y cenas). Los desayunos, "
-            "colaciones y meriendas están en el capítulo 5.", size=9.5, color=GRIS)
-    for rid in principales(semana):
-        ficha_receta(REC[rid])
+        h3("Recetas de la semana")
+        for rid in principales(semana, estacion):
+            if rid not in ya_impresas:
+                ficha_receta(REC[rid])
+                ya_impresas.add(rid)
 
 # ============================================================== VIANDAS
-h1("8. Guía de viandas")
+h1("10. Guía de viandas")
 parrafo("La comida casera guardada bien dura más, conserva mejor sus nutrientes y evita "
         "infecciones. Estas son las reglas que usa una cocina de viandas.")
 
@@ -789,7 +803,7 @@ for tip in D["tips"]:
 # ============================================================== COMPRAS
 def compras(semana, estacion="primavera"):
     mapa = {}
-    for d in D["menus"][semana]["dias"]:
+    for d in D["menus"][semana]["temporadas"][estacion]["dias"]:
         for t in D["tomas"]:
             r = REC[d[t["id"]]]
             for ing in r["ingredientes"]:
@@ -819,7 +833,7 @@ def compras(semana, estacion="primavera"):
     return [(k, res[k]) for k in orden if k in res]
 
 
-h1("9. Lista de compras")
+h1("11. Lista de compras")
 parrafo("Calculada para una persona y una semana, en primavera. Al cambiar la estación, cambian "
         "las frutas y verduras: la aplicación web genera la lista actualizada. Para más comensales, "
         "multiplicar las cantidades por el número de personas.")
@@ -845,7 +859,7 @@ for semana, titulo in [("A", "Semana A"), ("B", "Semana B")]:
             celda_texto(f.cells[1], cant, size=8.5, color=VERDE, align=WD_ALIGN_PARAGRAPH.RIGHT)
 
 # ============================================================== ANEXO
-h1("10. Anexo")
+h1("12. Anexo")
 h2("Medidas caseras")
 medidas = [
     ("1 taza", "240 ml", "1 vaso", "200 ml"),

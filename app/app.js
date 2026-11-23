@@ -156,18 +156,25 @@
   }
 
   /* ---------------- render: menú ---------------- */
+  function temporadaActual(menu) {
+    return (menu.temporadas && menu.temporadas[state.estacion]) || menu;
+  }
+
   function renderMenu() {
     const est = D.estaciones[state.estacion];
     const menu = D.menus[state.menu];
+    const temp = temporadaActual(menu);
 
     $("#hero-estacion").textContent = `${est.emoji} ${est.nombre} · ${est.meses}`;
-    $("#hero-desc").textContent = menu.descripcion;
+    $("#hero-desc").textContent = temp.descripcion || menu.descripcion;
     $("#titulo-menu").textContent = `${menu.nombre} · ${menu.lema}`;
 
-    const filas = D.resumen[state.menu];
+    const filas = (D.resumen[state.menu] && D.resumen[state.menu][state.estacion])
+      || (Array.isArray(D.resumen[state.menu]) ? D.resumen[state.menu] : null)
+      || D.resumen.A[Object.keys(D.resumen.A)[0]];
     const prom = k => filas.reduce((a, f) => a + f[k], 0) / filas.length;
     $("#hero-resumen").innerHTML = `
-      <h4>Promedio por día</h4>
+      <h4>Promedio por día · ${est.nombre}</h4>
       <div class="resumen-fila"><span>Energía</span><strong>${num(prom("kcal"))} kcal</strong></div>
       <div class="resumen-fila"><span>Proteínas</span><strong>${num(prom("prot"))} g</strong></div>
       <div class="resumen-fila"><span>Calcio</span><strong>${num(prom("calcio"))} mg</strong></div>
@@ -179,7 +186,7 @@
       `<strong>${est.emoji} ${est.nombre}:</strong> ${esc(nota)} ` +
       `<br><span style="color:var(--suave)">Lo mejor de la estación: <em>${esc(destacados)}</em>.</span>`;
 
-    $("#contenedor-dias").innerHTML = menu.dias.map(d => {
+    $("#contenedor-dias").innerHTML = temp.dias.map(d => {
       const tomas = D.tomas.map(t => {
         const r = REC[d[t.id]];
         return `
@@ -540,7 +547,9 @@
     $("#plato-lista").innerHTML = D.nutricion.plato.items.map(it =>
       `<li><strong>${esc(it[0])}</strong><span>${esc(it[1])}<br><small style="color:var(--suave)">${esc(it[2])}</small></span></li>`).join("");
 
-    const filas = D.resumen[state.menu];
+    const filas = (D.resumen[state.menu] && D.resumen[state.menu][state.estacion])
+      || (Array.isArray(D.resumen[state.menu]) ? D.resumen[state.menu] : null)
+      || D.resumen.A[Object.keys(D.resumen.A)[0]];
     const prom = k => filas.reduce((a, f) => a + f[k], 0) / filas.length;
     const objetivos = [
       { k: "kcal", t: "Energía", obj: 1800, u: "kcal", dec: 0 },

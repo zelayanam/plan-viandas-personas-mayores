@@ -6,7 +6,7 @@ Fuente unica: se usa para generar la app web, el DOCX y el XLSX.
 
 META = {
     "titulo": "Plan de Viandas para Personas Mayores",
-    "subtitulo": "Dos menus semanales, recetas y cantidades para cocinar y envasar",
+    "subtitulo": "Ocho semanas de menús, recetas y cantidades para cocinar y envasar",
     "pais": "Argentina",
     "version": "1.0",
     "actualizado": "noviembre 2026",
@@ -231,6 +231,16 @@ ALIMENTOS = {
     "masa para tarta": dict(kcal=330, p=8, ca=30, fb=2, fe=1.5, cat="almacen"),
     "levadura":        dict(kcal=105, p=12, ca=30, fb=6, fe=2, cat="almacen"),
     "azucar":          dict(kcal=400, p=0, ca=0, fb=0, fe=0, cat="almacen"),
+    # Verano y primavera
+    "chaucha":         dict(kcal=31, p=1.8, ca=37, fb=3, fe=1.0, cat="verduleria"),
+    "albahaca":        dict(kcal=23, p=3.2, ca=177, fb=1.6, fe=3.2, cat="verduleria"),
+    "esparragos":      dict(kcal=20, p=2.2, ca=24, fb=2, fe=2.1, cat="verduleria"),
+    "menta":           dict(kcal=44, p=3.3, ca=200, fb=6, fe=5.0, cat="verduleria"),
+    "mozzarella":      dict(kcal=280, p=18.0, ca=500, fb=0, fe=0.4, cat="lacteos"),
+    "yogur griego":    dict(kcal=100, p=6.0, ca=100, fb=0, fe=0.1, cat="lacteos"),
+    "tortilla integral": dict(kcal=300, p=8.0, ca=40, fb=4, fe=2.0, cat="panaderia", ud="u", g_ud=40),
+    "mostaza":         dict(kcal=66, p=4.0, ca=60, fb=3, fe=1.5, cat="almacen"),
+    "vinagre":         dict(kcal=20, p=0, ca=6, fb=0, fe=0.5, cat="almacen"),
 }
 
 # Ingredientes que se compran por unidad (huevos)

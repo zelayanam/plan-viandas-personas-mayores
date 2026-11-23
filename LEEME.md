@@ -1,7 +1,8 @@
 # Plan de viandas para personas mayores
 
-Plan de alimentación para adultos mayores de 65 años, con dos menús semanales, recetas,
-cantidades y una aplicación web para elegir estación, menú y porciones.
+Plan de alimentación para adultos mayores de 65 años, con **ocho semanas de menús**
+(dos menús × cuatro estaciones), 66 recetas, cantidades y una aplicación web para elegir
+estación, menú y porciones.
 
 ## Archivos
 
@@ -40,13 +41,16 @@ La preferencia queda guardada en el navegador y también se puede fijar con un e
 
 ## Qué incluye el plan
 
-- **Menú A · Sabores de casa:** cocina casera argentina (guisos, tartas, milanesas al horno).
-- **Menú B · Cocina mediterránea:** más pescado, legumbres y verduras.
-- **44 recetas** con ingredientes, cantidades por persona, preparación paso a paso y consejos.
+- **Menú A · Sabores de casa** y **Menú B · Cocina mediterránea**, cada uno con **cuatro
+  semanas distintas**, una por estación. No cambian solo las frutas y verduras: cambian los platos.
+- **Invierno y otoño:** guisos, sopas y horno.
+- **Primavera:** cocción ligera, arvejas, espárragos y ensaladas.
+- **Verano:** sin horno, ensaladas completas, platos fríos y gazpacho, para no calentar la cocina.
+- **66 recetas** con ingredientes, cantidades por persona, preparación paso a paso y consejos.
 - **Productos de estación** de primavera, verano, otoño e invierno (hemisferio sur).
 - **Guía de viandas:** envases, cadena de frío, recalentado, texturas seguras y congelado.
-- **Cobertura nutricional estimada:** 1.775 kcal, 93 g de proteína, 996 mg de calcio y
-  31 g de fibra por día en el Menú A; 1.791 kcal, 92 g, 1.064 mg y 32 g en el Menú B.
+- **Cobertura nutricional estimada por estación:** alrededor de 1.690 kcal y 85 g de proteína
+  en primavera y verano, y 1.780 kcal y 92 g en otoño e invierno.
 
 ## Sobre las cantidades
 

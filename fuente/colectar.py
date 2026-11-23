@@ -4,6 +4,7 @@
 import datos_plan as D
 import recetas_a as RA
 import recetas_b as RB
+import recetas_verano as RV
 import menus as M
 
 ALIMENTOS = dict(D.ALIMENTOS)
@@ -39,23 +40,33 @@ def calcular(receta):
     return out
 
 
-RECETAS = [calcular(r) for r in (RA.RECETAS + RB.RECETAS_B)]
+RECETAS = [calcular(r) for r in (RA.RECETAS + RB.RECETAS_B + RV.RECETAS_VERANO)]
 REC = {r["id"]: r for r in RECETAS}
+
+# Verificar que todos los menus referencien recetas existentes
+for k, menu in M.MENUS.items():
+    for est, temp in menu["temporadas"].items():
+        for d in temp["dias"]:
+            for t, _n, _h in M.TOMAS:
+                if d[t] not in REC:
+                    raise SystemExit(f"Falta receta {d[t]} en menu {k} / {est} / {d['dia']} / {t}")
 
 resumen = {}
 for k, menu in M.MENUS.items():
-    filas = []
-    for d in menu["dias"]:
-        acc = dict(kcal=0, prot=0.0, calcio=0.0, fibra=0.0, hierro=0.0)
-        for t, _n, _h in M.TOMAS:
-            n = REC[d[t]]["nutricion"]
-            acc["kcal"] += n["kcal"]
-            acc["prot"] += n["prot"]
-            acc["calcio"] += n["calcio"]
-            acc["fibra"] += n["fibra"]
-            acc["hierro"] += n["hierro"]
-        filas.append(dict(dia=d["dia"], **{k2: round(v) for k2, v in acc.items()}))
-    resumen[k] = filas
+    resumen[k] = {}
+    for est, temp in menu["temporadas"].items():
+        filas = []
+        for d in temp["dias"]:
+            acc = dict(kcal=0, prot=0.0, calcio=0.0, fibra=0.0, hierro=0.0)
+            for t, _n, _h in M.TOMAS:
+                n = REC[d[t]]["nutricion"]
+                acc["kcal"] += n["kcal"]
+                acc["prot"] += n["prot"]
+                acc["calcio"] += n["calcio"]
+                acc["fibra"] += n["fibra"]
+                acc["hierro"] += n["hierro"]
+            filas.append(dict(dia=d["dia"], **{k2: round(v) for k2, v in acc.items()}))
+        resumen[k][est] = filas
 
 datos = dict(
     meta=D.META,
