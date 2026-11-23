@@ -147,7 +147,7 @@ hojas = [
     ("Menú B", "Las cuatro semanas mediterráneas, con el detalle de cada comida."),
     ("Recetas", "Las 66 recetas con tiempos, porciones y aporte nutricional por porción."),
     ("Nutrición", "Cobertura diaria de las 8 semanas, con promedios y objetivos."),
-    ("Compras A / B", "Lista de compras por rubro para cada semana (primavera)."),
+    ("Compras A / B", "Lista de compras por rubro para las cuatro estaciones."),
     ("Estación", "Frutas y verduras de cada estación del año."),
     ("Guía de viandas", "Envases, frío, recalentado y texturas."),
 ]
@@ -300,26 +300,38 @@ def compras(semana, estacion="primavera"):
 for sem in ["A", "B"]:
     ws = wb.create_sheet(f"Compras {sem}")
     ws.sheet_view.showGridLines = False
-    titulo(ws, f"Lista de compras · Semana {sem}",
-           "Para una persona y una semana, en primavera. Cambiar la estación en la app actualiza la lista.")
-    cabecera(ws, 4, ["Rubro", "Producto", "Cantidad"], [26, 46, 14])
-    r = 5
-    for it in compras(sem):
-        if it["u"]:
-            u = math.ceil(it["g"] / 50)
-            cant = f"{u} {'unidad' if u == 1 else 'unidades'}"
-        else:
-            cant = fmt_g(it["g"])
-        vals = [D["cats"][it["cat"]], it["nombre"], cant]
-        for i, v in enumerate(vals, 1):
-            c = ws.cell(row=r, column=i, value=v)
-            c.border = BORDE
-            c.font = Font(size=10, bold=(i == 2))
-            c.alignment = Alignment(vertical="center", horizontal="right" if i == 3 else "left")
-            if i == 1:
-                c.font = Font(size=9, color=GRIS)
+    titulo(ws, f"Lista de compras · Menú {sem}",
+           "Para una persona y una semana, en las cuatro estaciones. Cada bloque tiene su propia lista.")
+    r = 4
+    for est in ["primavera", "verano", "otono", "invierno"]:
+        e = D["estaciones"][est]
+        ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=3)
+        c = ws.cell(row=r, column=1, value=f"{e['nombre'].upper()} · {e['meses']}")
+        c.font = Font(bold=True, color=BLANCO, size=10)
+        c.fill = PatternFill("solid", fgColor=VERDE)
+        c.alignment = Alignment(vertical="center")
+        ws.row_dimensions[r].height = 24
         r += 1
-    ws.auto_filter.ref = f"A4:C{r-1}"
+
+        cabecera(ws, r, ["Rubro", "Producto", "Cantidad"], [26, 46, 14])
+        r += 1
+        ini = r
+        for it in compras(sem, est):
+            if it["u"]:
+                u = math.ceil(it["g"] / 50)
+                cant = f"{u} {'unidad' if u == 1 else 'unidades'}"
+            else:
+                cant = fmt_g(it["g"])
+            vals = [D["cats"][it["cat"]], it["nombre"], cant]
+            for i, v in enumerate(vals, 1):
+                c = ws.cell(row=r, column=i, value=v)
+                c.border = BORDE
+                c.font = Font(size=10, bold=(i == 2))
+                c.alignment = Alignment(vertical="center", horizontal="right" if i == 3 else "left")
+                if i == 1:
+                    c.font = Font(size=9, color=GRIS)
+            r += 1
+        r += 1
     ws.freeze_panes = "A5"
 
 # ============================================================ ESTACION

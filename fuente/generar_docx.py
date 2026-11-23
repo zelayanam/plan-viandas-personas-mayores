@@ -272,6 +272,12 @@ def mantener_tabla_junta(tabla):
                     p_.paragraph_format.keep_with_next = True
 
 
+def filas_sin_cortar(tabla):
+    """Evita que una fila se parta al medio entre dos páginas."""
+    for fila in tabla.rows:
+        fila._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+
+
 def f1(v):
     return f"{v:.1f}".replace(".", ",")
 
@@ -834,29 +840,41 @@ def compras(semana, estacion="primavera"):
 
 
 h1("11. Lista de compras")
-parrafo("Calculada para una persona y una semana, en primavera. Al cambiar la estación, cambian "
-        "las frutas y verduras: la aplicación web genera la lista actualizada. Para más comensales, "
-        "multiplicar las cantidades por el número de personas.")
+parrafo("Calculada para una persona y una semana, para las cuatro estaciones. Cada estación "
+        "tiene su propia lista porque cambian los platos y los productos de temporada. "
+        "Para más comensales, multiplicar las cantidades por el número de personas.")
 parrafo("Los huevos se indican en unidades; el resto, en gramos o kilos. Las cantidades incluyen "
         "lo necesario para las cinco comidas de los siete días.", size=9, color=GRIS)
 
-for semana, titulo in [("A", "Semana A"), ("B", "Semana B")]:
-    h2(titulo)
-    for cat, items in compras(semana):
-        h3(D["cats"][cat])
-        t = doc.add_table(rows=0, cols=2)
-        t.alignment = WD_TABLE_ALIGNMENT.CENTER
-        bordes_tabla(t, "E8DFCE", "4")
-        ancho_columnas(t, [12.4, 4.8])
-        for it in items:
-            f = t.add_row()
-            celda_texto(f.cells[0], it["nombre"], size=8.5)
-            if it["u"]:
-                u = math.ceil(it["g"] / 50)
-                cant = f"{u} {'unidad' if u == 1 else 'unidades'}"
-            else:
-                cant = fmt_g(it["g"])
-            celda_texto(f.cells[1], cant, size=8.5, color=VERDE, align=WD_ALIGN_PARAGRAPH.RIGHT)
+for est in ["primavera", "verano", "otono", "invierno"]:
+    e = D["estaciones"][est]
+    h2(f"{e['nombre']} · {e['meses']}")
+    parrafo(f"Lo mejor de la estación: {', '.join(e['destacados'])}.", size=9, color=GRIS)
+    for semana in ["A", "B"]:
+        h3(f"Menú {semana}")
+        for cat, items in compras(semana, est):
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(6)
+            p.paragraph_format.space_after = Pt(2)
+            r = p.add_run(D["cats"][cat])
+            r.bold = True
+            r.font.size = Pt(9)
+            r.font.color.rgb = TERRA
+
+            t = doc.add_table(rows=0, cols=2)
+            t.alignment = WD_TABLE_ALIGNMENT.CENTER
+            bordes_tabla(t, "E8DFCE", "4")
+            ancho_columnas(t, [12.4, 4.8])
+            for it in items:
+                f = t.add_row()
+                celda_texto(f.cells[0], it["nombre"], size=8.5)
+                if it["u"]:
+                    u = math.ceil(it["g"] / 50)
+                    cant = f"{u} {'unidad' if u == 1 else 'unidades'}"
+                else:
+                    cant = fmt_g(it["g"])
+                celda_texto(f.cells[1], cant, size=8.5, color=VERDE, align=WD_ALIGN_PARAGRAPH.RIGHT)
+            filas_sin_cortar(t)
 
 # ============================================================== ANEXO
 h1("12. Anexo")

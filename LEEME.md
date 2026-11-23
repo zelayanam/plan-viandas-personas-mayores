@@ -48,6 +48,7 @@ La preferencia queda guardada en el navegador y también se puede fijar con un e
 - **Verano:** sin horno, ensaladas completas, platos fríos y gazpacho, para no calentar la cocina.
 - **66 recetas** con ingredientes, cantidades por persona, preparación paso a paso y consejos.
 - **Productos de estación** de primavera, verano, otoño e invierno (hemisferio sur).
+- **Listas de compras para las cuatro estaciones**, por rubro, para cada menú.
 - **Guía de viandas:** envases, cadena de frío, recalentado, texturas seguras y congelado.
 - **Cobertura nutricional estimada por estación:** alrededor de 1.690 kcal y 85 g de proteína
   en primavera y verano, y 1.780 kcal y 92 g en otoño e invierno.
