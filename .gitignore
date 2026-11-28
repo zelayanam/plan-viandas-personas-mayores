@@ -27,3 +27,7 @@ ads/
 # Muestras y exploraciones
 muestras/
 qa-fotos/
+
+# Intermedios
+epub-build/
+anuncios-fotos/
